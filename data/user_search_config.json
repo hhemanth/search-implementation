@@ -1,0 +1,9 @@
+{
+  "schema": {
+    "tokenize_list": [
+      "name",
+      "signature",
+      "tags"
+    ]
+  }
+}

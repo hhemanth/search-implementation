@@ -16,7 +16,7 @@ class DocumentIndex
   end
 
   def load_schema
-    if options.empty?  || options[:schema].empty?
+    if options.nil?  || options[:schema].nil?
       @tokenize_list = []
     else
       schema = options[:schema]
