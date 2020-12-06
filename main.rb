@@ -12,7 +12,18 @@ search_options =
             index_name: 'User',
             data_file: 'data/users.json',
             config_file: 'data/user_search_config.json'
+        },
+        {
+            index_name: 'Organization',
+            data_file: 'data/organizations.json',
+            config_file: 'data/organization_search_config.json'
+        },
+        {
+            index_name: 'Ticket',
+            data_file: 'data/tickets.json',
+            config_file: 'data/ticket_search_config.json'
         }
+
     ]
 
 

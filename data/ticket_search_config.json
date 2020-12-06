@@ -1,0 +1,9 @@
+{
+  "schema": {
+    "tokenize_list": [
+      "subject",
+      "description",
+      "tags"
+    ]
+  }
+}

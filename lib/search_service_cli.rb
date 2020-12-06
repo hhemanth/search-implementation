@@ -37,7 +37,7 @@ class SearchServiceCli
     @pastel = Pastel.new
     puts @pastel.cyan("Welcome to Zendesk Search")
     @prompt = TTY::Prompt.new(active_color: 'magenta')
-    @bar = TTY::ProgressBar.new("loading [:bar]", total: 15)
+
   end
 
   def parse_search_options
@@ -65,9 +65,10 @@ class SearchServiceCli
   end
 
   def progress_bar
-    15.times do
-      sleep(0.2)
-      @bar.advance(1)
+    @bar = TTY::ProgressBar.new("loading [:bar]", total: 50)
+    50.times do
+      sleep(0.1)
+      @bar.advance(5)
     end
   end
 end
