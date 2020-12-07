@@ -1,14 +1,14 @@
 This is implementation of Basic Search from scratch. This is a CLI app. 
 
-How to run?
+### How to run?
 use ruby 2.6.5
 
-```ruby
-#navigate to app director 
-cd basic_search 
+```shell
+git clone git@github.com:hhemanth/search-implementation.git 
+cd search-implementation 
 ruby main.rb
 ```
-
+### prerequisites
 The data files have to be placed in the `data` directory. The data file is in ``json`` format.
 
 Sample data file which has 2 records (taken from organizations.json). 
@@ -77,7 +77,7 @@ Each data file has to accompanied by a config file. The config file should conta
 The term `tokenize_list` signifies which of the attributes in the data file, will be tokenized (split into words and each word indexed seperately). All attributes which are not specified part of `tokenize_list` are not tokenized or processed (except for downcasing), and are seachable only by exact match (example: id, external_id, url)
 
 
-##How is data indexed?
+### How is data indexed?
 
 
 The indexing of a data file produces the following 2 indices.
