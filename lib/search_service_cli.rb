@@ -29,6 +29,7 @@ class SearchServiceCli
         value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + data_files_indexer_service.attribute_values(index_to_search, attribute_to_search))
         value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
         search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search)
+        puts @pastel.green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
         print_hash_as_table(search_results)
       elsif user_input == "View Searchable Fields"
         index_input = prompt.select("Select", data_files_indexer_service.indices)
@@ -65,6 +66,7 @@ class SearchServiceCli
     search_results.each do |result|
       table = TTY::Table.new(header: ["Attribute", "Value"])
       result.each do |k,v|
+        v = v.to_s[0,100] if v.to_s.size >100
         table << [k,v]
       end
       puts table.render(:unicode)
