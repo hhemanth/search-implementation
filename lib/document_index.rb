@@ -33,6 +33,10 @@ class DocumentIndex
     attribute_index_hash.keys
   end
 
+  def values_for_attr(attr)
+    attribute_index_hash[attr].attr_values
+  end
+
   def index!(docs_arr)
     src_index.index!(docs_arr)
     docs_arr.each do |doc|

@@ -18,15 +18,21 @@ RSpec.describe AttributeIndex do
     end
   end
 
-  context '#index & #search' do
-    it 'searches for attributes' do
+  context '#index & #search, #attr_values' do
+    before do
       attribute_index.index!("Bob", 1)
       attribute_index.index!("Dan", 2)
       attribute_index.index!("Hemanth", 1)
+    end
+    it 'searches for attributes' do
       expect(attribute_index.search('bob')).to eq([1])
       expect(attribute_index.search('Bob')).to eq([1])
       expect(attribute_index.search('Bbb')).to eq([])
       expect(attribute_index.search('Dan')).to eq([2])
+    end
+
+    it 'returns attr_values' do
+      expect(attribute_index.attr_values).to match_array(['bob', 'dan', 'hemanth'])
     end
   end
 

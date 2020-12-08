@@ -82,6 +82,12 @@ RSpec.describe DocumentIndex do
     end
   end
 
+  context '#values_for_attr' do
+    it 'returns all values, given an attribute' do
+      expect(document_index.values_for_attr('type')).to match_array(['incident', 'task'])
+    end
+  end
+
   context '#search' do
     it 'search for id' do
       expect(document_index.search(attr: '_id', val: '674a19a1-c330-45fb-8b61-b4d77ba87130')).to eq([document2])

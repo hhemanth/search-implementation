@@ -4,6 +4,7 @@ require 'pastel'
 require 'tty-prompt'
 require 'tty-progressbar'
 require_relative 'lib/search_service_cli'
+require_relative 'lib/data_files_indexer_service'
 
 search_options =
 
@@ -27,7 +28,9 @@ search_options =
     ]
 
 
-SearchServiceCli.new(search_options).run
+data_indexer_service = DataFilesIndexerService.new(search_options)
+data_indexer_service.index_data_files!
+SearchServiceCli.new(data_indexer_service).run
 
 
 # progress_bar
