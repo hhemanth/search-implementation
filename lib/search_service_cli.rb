@@ -2,6 +2,7 @@ require_relative 'document_index'
 require 'pastel'
 require 'tty-prompt'
 require 'tty-progressbar'
+require 'tty-table'
 require 'active_support/core_ext/hash/indifferent_access'
 
 class SearchServiceCli
@@ -25,17 +26,14 @@ class SearchServiceCli
       if user_input == "Search Zendesk"
         index_to_search = prompt.select("Select", data_files_indexer_service.indices)
         attribute_to_search = prompt.select("Select Search term: ", data_files_indexer_service.attributes(index_to_search))
-        value_to_search =prompt.select("Enter or Select Search value?", ["Enter value"] + data_files_indexer_service.attribute_values(index_to_search, attribute_to_search) )
+        value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + data_files_indexer_service.attribute_values(index_to_search, attribute_to_search))
         value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
-        search_results =  data_files_indexer_service.search(index:index_to_search, attr: attribute_to_search, value: value_to_search)
-        pp search_results
-        puts "===================================="
-        puts "\n"
+        search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search)
+        print_hash_as_table(search_results)
       elsif user_input == "View Searchable Fields"
         index_input = prompt.select("Select", data_files_indexer_service.indices)
-        pp data_files_indexer_service.attributes(index_input)
-        puts "-------------------------------------"
-        puts "\n"
+        attributes = data_files_indexer_service.attributes(index_input)
+        print_arr_as_table(attributes, index_input)
       end
     end
   end
@@ -54,4 +52,23 @@ class SearchServiceCli
       @bar.advance(5)
     end
   end
+
+  def print_arr_as_table(arr, header)
+    table = TTY::Table.new(header: ["Searchable fields for #{header}"])
+    arr.each do |element|
+      table << [element]
+    end
+    puts table.render(:unicode)
+  end
+
+  def print_hash_as_table(search_results)
+    search_results.each do |result|
+      table = TTY::Table.new(header: ["Attribute", "Value"])
+      result.each do |k,v|
+        table << [k,v]
+      end
+      puts table.render(:unicode)
+    end
+  end
+
 end

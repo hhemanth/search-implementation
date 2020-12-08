@@ -11,3 +11,4 @@ gem 'pastel'
 gem 'tty-font'
 gem 'tty-progressbar'
 gem 'tty-spinner'
+gem "tty-table"
