@@ -13,16 +13,29 @@ class SearchServiceCli
   end
 
   def run
+
+    data_files_indexer_service.indices.each do |index|
+      puts @pastel.cyan("Indexing #{index}")
+      progress_bar
+    end
+
     loop do
       user_input = prompt.select("Select Search Options:", ["Search Zendesk", "View Searchable Fields", "Quit"])
       break if user_input == "Quit"
       if user_input == "Search Zendesk"
         index_to_search = prompt.select("Select", data_files_indexer_service.indices)
-        # doc_index = doc_indices_hash[index_to_search]
         attribute_to_search = prompt.select("Select Search term: ", data_files_indexer_service.attributes(index_to_search))
         value_to_search =prompt.select("Enter or Select Search value?", ["Enter value"] + data_files_indexer_service.attribute_values(index_to_search, attribute_to_search) )
         value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
-        pp data_files_indexer_service.search(index:index_to_search, attr: attribute_to_search, value: value_to_search)
+        search_results =  data_files_indexer_service.search(index:index_to_search, attr: attribute_to_search, value: value_to_search)
+        pp search_results
+        puts "===================================="
+        puts "\n"
+      elsif user_input == "View Searchable Fields"
+        index_input = prompt.select("Select", data_files_indexer_service.indices)
+        pp data_files_indexer_service.attributes(index_input)
+        puts "-------------------------------------"
+        puts "\n"
       end
     end
   end
@@ -31,7 +44,6 @@ class SearchServiceCli
     @pastel = Pastel.new
     puts @pastel.cyan("Welcome to Zendesk Search")
     @prompt = TTY::Prompt.new(active_color: 'magenta')
-
   end
 
 
