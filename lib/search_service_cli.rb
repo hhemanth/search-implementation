@@ -14,7 +14,6 @@ class SearchServiceCli
   end
 
   def run
-
     data_files_indexer_service.indices.each do |index|
       puts @pastel.cyan("Indexing #{index}")
       progress_bar
@@ -24,20 +23,14 @@ class SearchServiceCli
       user_input = prompt.select("Select Search Options:", ["Search Zendesk", "View Searchable Fields", "Quit"])
       break if user_input == "Quit"
       if user_input == "Search Zendesk"
-        index_to_search = prompt.select("Select", data_files_indexer_service.indices)
-        attribute_to_search = prompt.select("Select Search term: ", data_files_indexer_service.attributes(index_to_search))
-        value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + data_files_indexer_service.attribute_values(index_to_search, attribute_to_search))
-        value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
-        search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search)
-        puts @pastel.green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
-        print_hash_as_table(search_results)
+        search_zendex
       elsif user_input == "View Searchable Fields"
-        index_input = prompt.select("Select", data_files_indexer_service.indices)
-        attributes = data_files_indexer_service.attributes(index_input)
-        print_arr_as_table(attributes, index_input)
+        view_searchable_fields
       end
     end
   end
+
+  private
 
   def initialize_cli
     @pastel = Pastel.new
@@ -73,4 +66,27 @@ class SearchServiceCli
     end
   end
 
+  def view_searchable_fields
+    index_input = prompt.select("Select", data_files_indexer_service.indices)
+    attributes = attributes_arr(index_input)
+    print_arr_as_table(attributes, index_input)
+  end
+
+  def search_zendex
+    index_to_search = prompt.select("Select", data_files_indexer_service.indices)
+    attribute_to_search = prompt.select("Select Search term: ", attributes_arr(index_to_search))
+    value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + attribute_values(attribute_to_search, index_to_search))
+    value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
+    search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search)
+    puts @pastel.green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
+    print_hash_as_table(search_results)
+  end
+
+  def attribute_values(attribute_to_search, index_to_search)
+    data_files_indexer_service.attribute_values(index_to_search, attribute_to_search)
+  end
+
+  def attributes_arr(index_to_search)
+    data_files_indexer_service.attributes(index_to_search)
+  end
 end
