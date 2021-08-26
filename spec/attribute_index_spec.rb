@@ -36,4 +36,23 @@ RSpec.describe AttributeIndex do
     end
   end
 
+  context 'handle empty attributes' do
+    context '#index & #search, #attr_values' do
+      before do
+        attribute_index.index!("Bob", 1)
+        attribute_index.index!("Dan", 2)
+        attribute_index.index!("Hemanth", 1)
+        attribute_index.index!("", 1)
+        attribute_index.index!("", 2)
+      end
+
+      it 'searches for attributes' do
+        expect(attribute_index.search('bob')).to eq([1])
+        expect(attribute_index.search('Bob')).to eq([1])
+        expect(attribute_index.search('Bbb')).to eq([])
+        expect(attribute_index.search('')).to match_array([1,2])
+      end
+    end
+  end
+
 end
