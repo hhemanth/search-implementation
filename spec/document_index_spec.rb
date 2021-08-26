@@ -101,7 +101,18 @@ RSpec.describe DocumentIndex do
       expect(document_index.search(attr: 'due_at', val: '2016-08-15T06:13:11 -10:00')).to eq([document2])
     end
     it 'search for string in text' do
-      expect(document_index.search(attr: 'subject', val: 'Miquelon')).to eq([document2])
+      res_hash = {
+          documents: {
+              "1a227508-9f39-427c-8f57-1b72f3fab87c"=> {
+                  "data"=> document2,
+                  "references"=> {
+                      "tickets" => ticket_ids,
+                      "users" => user_ids
+                  }
+              }
+          }
+      }
+      expect(document_index.search(attr: 'subject', val: 'Miquelon')).to eq(res_hash)
     end
   end
 end
