@@ -42,8 +42,6 @@ class DataFilesIndexerService
       config = JSON.parse(File.read(config_file)).with_indifferent_access
       doc_index = DocumentIndex.new(search_index,config)
       doc_index.index!(data)
-      # puts pastel.cyan("Indexing #{search_index}")
-      # progress_bar
       doc_indices_hash[search_index] = doc_index
     end
   end
