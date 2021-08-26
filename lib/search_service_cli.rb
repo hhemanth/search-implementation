@@ -42,7 +42,6 @@ class SearchServiceCli
   def progress_bar
     @bar = TTY::ProgressBar.new("loading [:bar]", total: 50)
     50.times do
-      sleep(0.1)
       @bar.advance(5)
     end
   end
