@@ -14,4 +14,14 @@ RSpec.describe TextTokenizer do
     text_tokenizer = TextTokenizer.new("A Drama in St. Pierre and Miquelon")
     expect(text_tokenizer.tokens).to match_array([ "drama", "pierre", "miquelon"])
   end
+
+  it 'given empty string, return an array of empty string' do
+    text_tokenizer = TextTokenizer.new("")
+    expect(text_tokenizer.tokens).to match_array([""])
+  end
+
+  it 'given string of empty spaces, return an array of empty string' do
+    text_tokenizer = TextTokenizer.new("   ")
+    expect(text_tokenizer.tokens).to match_array([""])
+  end
 end

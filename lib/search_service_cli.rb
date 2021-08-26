@@ -76,7 +76,7 @@ class SearchServiceCli
     attribute_to_search = prompt.select("Select Search term: ", attributes_arr(index_to_search))
     value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + attribute_values(attribute_to_search, index_to_search))
     value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
-    search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search)
+    search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, value: value_to_search.to_s)
     puts @pastel.green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
     print_hash_as_table(search_results)
   end

@@ -1,4 +1,5 @@
 require 'pry'
+require 'json'
 require_relative './document_index'
 class DataFilesIndexerService
   attr_accessor :search_options, :search_service_hash, :doc_indices_hash

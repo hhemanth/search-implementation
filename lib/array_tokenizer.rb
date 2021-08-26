@@ -6,6 +6,7 @@ class ArrayTokenizer
   end
 
   def tokens
+    return [''] if input_array.empty?
     input_array.uniq.compact.map(&:downcase)
   end
 end

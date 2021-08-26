@@ -61,7 +61,7 @@ class DocumentIndex
     document.each do |k, v|
       attribute_index_hash[k] ||= AttributeIndex.new(index_name, k)
 
-      tokens = tokenize_list.include?(k) ? fetch_tokens(v): [v.to_s]
+      tokens = tokenize_list.include?(k) ? fetch_tokens(v): [v.to_s.strip]
 
       next if tokens.nil? || (tokens.is_a?(Array) && tokens.size == 0)
       tokens.each do |t|
