@@ -8,7 +8,7 @@ class SrcIndex
   def index!(documents)
       documents.each do |doc|
         doc_id = doc['_id']
-        source_index[doc_id] = doc
+        source_index[doc_id.to_s] = doc
       end
   end
 
@@ -20,7 +20,11 @@ class SrcIndex
     source_index.keys
   end
 
+  def get(id)
+    source_index[id.to_s]
+  end
+
   def documents(ids)
-    source_index.values_at(*ids).compact
+    source_index.values_at(*(ids.map(&:to_s))).compact
   end
 end
