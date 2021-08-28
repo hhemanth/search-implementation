@@ -1,0 +1,15 @@
+{
+  "schema": {
+    "tokenize_list": [
+      "name",
+      "signature",
+      "tags"
+    ],
+    "reference_config": [
+      {
+        "reference_id":  "organization_id",
+        "reference_entity": "Organization"
+      }
+    ]
+  }
+}

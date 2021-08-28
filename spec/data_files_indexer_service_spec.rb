@@ -9,40 +9,19 @@ RSpec.describe DataFilesIndexerService do
     [
       {
         index_name: 'User',
-        data_file: 'data/users.json',
-        config_file: 'data/user_search_config.json',
-        reference_config:
-          [
-            {
-              'reference_id' => 'organization_id',
-              'reference_entity' => 'Organization'
-            }
-          ]
+        data_file: 'spec/fixtures/dataset1/users.json',
+        config_file: 'spec/fixtures/dataset1/user_search_config.json',
+
       },
       {
         index_name: 'Organization',
-        data_file: 'data/organizations.json',
-        config_file: 'data/organization_search_config.json'
+        data_file: 'spec/fixtures/dataset1/organizations.json',
+        config_file: 'spec/fixtures/dataset1/organization_search_config.json'
       },
       {
         index_name: 'Ticket',
-        data_file: 'data/tickets.json',
-        config_file: 'data/ticket_search_config.json',
-        reference_config:
-          [
-            {
-              'reference_id' => 'organization_id',
-              'reference_entity' => 'Organization'
-            },
-            {
-              'reference_id' => 'assignee_id',
-              'reference_entity' => 'User'
-            },
-            {
-              'reference_id' => 'submitter_id',
-              'reference_entity' => 'User'
-            }
-          ]
+        data_file: 'spec/fixtures/dataset1/tickets.json',
+        config_file: 'spec/fixtures/dataset1/ticket_search_config.json',
       }
     ]
   }
@@ -85,13 +64,6 @@ RSpec.describe DataFilesIndexerService do
     end
   end
   context 'Operations after Indexing' do
-    let(:options) { [
-      {
-        index_name: 'User',
-        data_file: 'spec/fixtures/users.json',
-        config_file: 'spec/fixtures/user_search_config.json'
-      }
-    ] }
 
     before do
       data_files_indexer_service.index_data_files!
@@ -99,7 +71,7 @@ RSpec.describe DataFilesIndexerService do
 
     context '#indexes' do
       it 'return all the indexes including global index' do
-        expect(data_files_indexer_service.indices).to match_array(%w(User Global))
+        expect(data_files_indexer_service.indices).to match_array(%w(User Organization Ticket))
       end
     end
     context '#attributes' do
@@ -114,20 +86,16 @@ RSpec.describe DataFilesIndexerService do
     context '#attribute_values' do
       it 'returns all attribute values, for a given attribute & index' do
         attr_values = data_files_indexer_service.attribute_values('User', 'email')
-        expect(attr_values).to match_array(['coffeyrasmussen@flotonic.com', 'jonibarlow@flotonic.com'])
+        expect(attr_values).to include('coffeyrasmussen@flotonic.com')
+        expect(attr_values).to include('jonibarlow@flotonic.com')
       end
-    end
-    it 'searches for terms' do
-      search_results = data_files_indexer_service.search(index: 'User', attr: 'name', value: 'francisca')
-      expect(search_results.first['_id']).to eq(1)
-      # user = search_results.first
-      # expect(user["Organization"]).not_to be(nil)
-      # expect(user["Organization"]["_id"]).to eq(user["organization_id"])
     end
 
     context '#search' do
       context 'search for single term in an attribute in a Index' do
         it 'should return all records with the given search term' do
+          search_results = data_files_indexer_service.search(index: 'User', attr: 'name', value: 'francisca')
+          expect(search_results.first['_id']).to eq(1)
         end
         it 'should return all records with given search criteria along with reference records' do
 
