@@ -114,17 +114,21 @@ RSpec.describe DataFilesIndexerService do
       context 'search for multiple terms in an attribute in an Index' do
         it 'should return all records with any or all of the terms' do
           search_results = data_files_indexer_service.search(index: 'Ticket', attr: 'subject', value: 'Hungary morocco')
-          expect(search_results.map{ |s| s['_id'] } ).to match_array(['87db32c5-76a3-4069-954c-7d59c6c21de0', '2217c7dc-7371-4401-8738-0a8a8aedc08d'])
+          expect(search_results.map { |s| s['_id'] }).to match_array(['87db32c5-76a3-4069-954c-7d59c6c21de0', '2217c7dc-7371-4401-8738-0a8a8aedc08d'])
         end
       end
 
       context 'search for empty string in an attribute in an Index ' do
         it 'should return all records with the attribute empty' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', attr: 'description', value: '')
+          expect(search_results.map { |s| s['_id'] }).to match_array(["436bf9b0-1147-4c0a-8439-6f79833bff5b", "fc5a8a70-3814-4b17-a6e9-583936fca909"])
         end
       end
 
       context ' search for nil value in an attribute in an Index' do
         it 'should return all records with the attribute empty' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', attr: 'description', value: nil)
+          expect(search_results.map { |s| s['_id'] }).to match_array(["436bf9b0-1147-4c0a-8439-6f79833bff5b", "fc5a8a70-3814-4b17-a6e9-583936fca909"])
         end
       end
 
@@ -136,11 +140,25 @@ RSpec.describe DataFilesIndexerService do
       end
       context 'search for multiple terms in all attributes in an Index' do
         it 'should return all records with any or all of the terms' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', value: 'question Nicaragua')
+          expect(search_results.count).to eq(51)
+          expect(search_results.map { |s| s["type"] }.uniq).to match_array(["question", "task"])
+          expect(search_results.map { |s| s["subject"] }.uniq).to include("A Nuisance in Nicaragua")
         end
+
+        it 'should return all records with any or all of the terms' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', value: 'A Nuisance in Nicaragua')
+          expect(search_results.count).to eq(49)
+          expect(search_results.map { |s| s["subject"] }.uniq).to include("A Nuisance in Nicaragua")
+        end
+
       end
 
       context 'search for empty string in all attributes in an Index ' do
         it 'should return all records with the attribute empty' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', value: "")
+          expect(search_results.map { |s| s['_id'] }).to match_array( ["436bf9b0-1147-4c0a-8439-6f79833bff5b", "1a227508-9f39-427c-8f57-1b72f3fab87c",
+                                                                       "87db32c5-76a3-4069-954c-7d59c6c21de0", "fc5a8a70-3814-4b17-a6e9-583936fca909"])
         end
       end
 
@@ -148,7 +166,6 @@ RSpec.describe DataFilesIndexerService do
         it 'should return all records with the attribute empty' do
         end
       end
-
 
       context 'search for single term in all attributes in all Indices' do
         it 'should return all records with the given search term' do
@@ -168,8 +185,6 @@ RSpec.describe DataFilesIndexerService do
         it 'should return all records with the attribute empty' do
         end
       end
-
-
 
     end
   end

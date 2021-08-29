@@ -94,6 +94,7 @@ class DataFilesIndexerService
   end
 
   def search_tokens(input_text)
+    return [''] if input_text.to_s.strip == ''
     (input_text.to_s).split(' ').map(&:downcase)
   end
 
