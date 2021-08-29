@@ -50,23 +50,28 @@ class DataFilesIndexerService
     end
   end
 
-  def search(options)
-    index_name = options[:index]
-    attr = options[:attr]
-    term = options[:value]
-    index = doc_indices_hash[index_name]
-    result = search_tokens(term).flat_map do |t|
-       index.search(attr: attr, val: t)
+  def search_global(term:nil)
+    result = {}
+    doc_indices_hash.keys.each do |index|
+      result[index] = search(index: index, term: term)
     end
-
-    add_reference_entities(result, options)
     result
   end
 
-  def add_reference_entities(result, options)
-    cur_index = options[:index]
-    ref_config = search_service_hash[cur_index][:reference_config]
 
+  def search(index:nil, attr:nil, term:nil)
+    doc_index = doc_indices_hash[index]
+    result = search_tokens(term).flat_map do |t|
+      doc_index.search(attr: attr, val: t)
+    end
+
+    add_reference_entities(result, index: index)
+    result
+  end
+
+  def add_reference_entities(result, index:)
+    ref_config = search_service_hash[index][:reference_config]
+    return unless ref_config
     ref_config.each do |ref_hash|
       cur_ref_id = ref_hash["reference_id"]
       cur_ref_entity = ref_hash["reference_entity"]
