@@ -74,7 +74,7 @@ RSpec.describe DocumentIndex do
 
   context '#attributes' do
     it 'should return attributes of documents indexed' do
-      expect(document_index.attributes).to match_array((document1.keys + document2.keys).uniq)
+      expect(document_index.attributes).to match_array((document1.keys + document2.keys + ['User_all_attrs']).uniq)
     end
   end
 

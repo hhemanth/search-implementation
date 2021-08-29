@@ -79,7 +79,7 @@ RSpec.describe DataFilesIndexerService do
         expect(data_files_indexer_service.attributes('User')).to match_array(
                                                                    %w[_id url external_id name alias created_at
                      active verified shared locale timezone last_login_at
-                     email phone signature organization_id tags suspended role])
+                     email phone signature organization_id tags suspended role User_all_attrs])
       end
     end
 
@@ -98,11 +98,23 @@ RSpec.describe DataFilesIndexerService do
           expect(search_results.first['_id']).to eq(1)
         end
         it 'should return all records with given search criteria along with reference records' do
-
+          search_results = data_files_indexer_service.search(index: 'User', attr: 'name', value: 'francisca')
+          user = search_results.first
+          expect(user["Organization"]["_id"]).to eq(user["organization_id"])
         end
+
+        it 'should return all records with given search criteria along with reference records' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', attr: '_id', value: '436bf9b0-1147-4c0a-8439-6f79833bff5b')
+          ticket = search_results.first
+          expect(ticket["Assignee"]["_id"]).to eq(ticket["assignee_id"])
+          expect(ticket["Submitter"]["_id"]).to eq(ticket["submitter_id"])
+        end
+
       end
       context 'search for multiple terms in an attribute in an Index' do
         it 'should return all records with any or all of the terms' do
+          search_results = data_files_indexer_service.search(index: 'Ticket', attr: 'subject', value: 'Hungary morocco')
+          expect(search_results.map{ |s| s['_id'] } ).to match_array(['87db32c5-76a3-4069-954c-7d59c6c21de0', '2217c7dc-7371-4401-8738-0a8a8aedc08d'])
         end
       end
 
@@ -118,6 +130,8 @@ RSpec.describe DataFilesIndexerService do
 
       context 'search for single term in all attributes in a Index' do
         it 'should return all records with the given search term' do
+          search_results = data_files_indexer_service.search(index: 'User', value: 'francisca')
+          expect(search_results.first['_id']).to eq(1)
         end
       end
       context 'search for multiple terms in all attributes in an Index' do

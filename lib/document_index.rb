@@ -44,10 +44,14 @@ class DocumentIndex
     end
   end
 
+  def get(id)
+    src_index.get(id)
+  end
+
   def search(argv)
     attr = argv[:attr]
     term = argv[:val]
-
+    attr = "#{index_name}_all_attrs" if attr.nil?
     attr_index = attribute_index_hash[attr]
     return [] if attr_index.nil?
 
@@ -66,11 +70,16 @@ class DocumentIndex
       next if tokens.nil? || (tokens.is_a?(Array) && tokens.size == 0)
       tokens.each do |t|
         attribute_index_hash[k].index!(t, document['_id'])
+        all_attrs_index.index!(t, document['_id'])
       end
     end
   end
 
   def fetch_tokens(v)
     CompositeTokenizer.new(v).tokens
+  end
+
+  def all_attrs_index
+    attribute_index_hash["#{index_name}_all_attrs"] ||= AttributeIndex.new(index_name, "#{index_name}_all_attrs")
   end
 end
