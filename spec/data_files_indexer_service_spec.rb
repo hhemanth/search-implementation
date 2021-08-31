@@ -176,7 +176,6 @@ RSpec.describe DataFilesIndexerService do
       context 'search for single term in all attributes in all Indices' do
         it 'should return all records with the given search term' do
           search_results = data_files_indexer_service.search_global(term: 'Nicaragua')
-          binding.pry
           expect(search_results).to be_a(Hash)
           expect(search_results.keys).to match_array(%w(Ticket Organization User))
           expect(search_results['User'].map { |s| s["_id"] }).to match_array([])
@@ -186,16 +185,36 @@ RSpec.describe DataFilesIndexerService do
       end
       context 'search for multiple terms in all attributes in all Indices' do
         it 'should return all records with any or all of the terms' do
+          search_results = data_files_indexer_service.search_global(term: 'A Nuisance in Nicaragua')
+          expect(search_results).to be_a(Hash)
+          expect(search_results.keys).to match_array(%w(Ticket Organization User))
+          expect(search_results['User'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Organization'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Ticket'].count).to eq(49)
+          expect(search_results['Ticket'].map { |s| s["subject"] }.uniq).to include("A Nuisance in Nicaragua")
         end
       end
 
       context 'search for empty string in all attributes in all Indices ' do
         it 'should return all records with the attribute empty' do
+          search_results = data_files_indexer_service.search_global(term: '')
+          expect(search_results).to be_a(Hash)
+          expect(search_results.keys).to match_array(%w(Ticket Organization User))
+          expect(search_results['User'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Organization'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Ticket'].map { |s| s["_id"] }).to match_array(["1a227508-9f39-427c-8f57-1b72f3fab87c", "436bf9b0-1147-4c0a-8439-6f79833bff5b", "87db32c5-76a3-4069-954c-7d59c6c21de0", "fc5a8a70-3814-4b17-a6e9-583936fca909"])
         end
       end
 
       context ' search for nil value in all attributes in all Indices' do
         it 'should return all records with the attribute empty' do
+          search_results = data_files_indexer_service.search_global(term: nil)
+          expect(search_results).to be_a(Hash)
+          expect(search_results.keys).to match_array(%w(Ticket Organization User))
+          expect(search_results['User'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Organization'].map { |s| s["_id"] }).to match_array([])
+          expect(search_results['Ticket'].map { |s| s["_id"] }).to match_array(["1a227508-9f39-427c-8f57-1b72f3fab87c", "436bf9b0-1147-4c0a-8439-6f79833bff5b", "87db32c5-76a3-4069-954c-7d59c6c21de0", "fc5a8a70-3814-4b17-a6e9-583936fca909"])
+
         end
       end
     end
