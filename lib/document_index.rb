@@ -4,6 +4,8 @@ require_relative './composite_tokenizer'
 
 require 'pry'
 
+#Indexes and stores the document for easy searching
+# Consider the following document
 class DocumentIndex
   attr_accessor :index_name,:options,  :src_index, :attribute_index_hash, :tokenize_list
 

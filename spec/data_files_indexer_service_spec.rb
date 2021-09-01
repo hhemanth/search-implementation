@@ -103,6 +103,14 @@ RSpec.describe DataFilesIndexerService do
           expect(user["Organization"]["_id"]).to eq(user["organization_id"])
         end
 
+        it 'should return all records with given search criteria along with reference records, for one to many references' do
+          search_results = data_files_indexer_service.search(index: 'Organization', attr: 'name', term: 'Enthaze')
+          org = search_results.first
+          expect(org["users"].map{|o| o["organization_id"]}.uniq).to eq([org["_id"]])
+        end
+
+
+
         it 'should return all records with given search criteria along with reference records' do
           search_results = data_files_indexer_service.search(index: 'Ticket', attr: '_id', term: '436bf9b0-1147-4c0a-8439-6f79833bff5b')
           ticket = search_results.first

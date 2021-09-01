@@ -16,10 +16,12 @@ class DataFilesIndexerService
       search_index = search_option[:index_name]
       config_file = config_file_path(search_option)
       config = JSON.parse(File.read(config_file)).with_indifferent_access
+
       search_service_hash[search_index] = {
         data_file: data_file_path(search_option),
         config_file: config_file_path(search_option),
-        reference_config: config[:schema][:reference_config]
+        one_to_one_reference_config: config[:schema][:one_to_one_reference_config],
+        one_to_many_reference_config: config[:schema][:one_to_many_reference_config]
       }
     end
   end
@@ -65,12 +67,30 @@ class DataFilesIndexerService
       doc_index.search(attr: attr, val: t)
     end
 
-    add_reference_entities(result, index: index)
+    add_one_to_one_reference_entities(result, index: index)
+    add_one_to_many_reference_entities(result, index: index)
     result
   end
 
-  def add_reference_entities(result, index:)
-    ref_config = search_service_hash[index][:reference_config]
+  def add_one_to_many_reference_entities(result, index:)
+    ref_config = search_service_hash[index][:one_to_many_reference_config]
+
+
+    return unless ref_config
+    ref_config.each do |ref_hash|
+      cur_ref_id = ref_hash["reference_id"]
+      cur_ref_entity = ref_hash["reference_entity"]
+      res_ref_entity = ref_hash["result_term"]
+      ref_index = doc_indices_hash[cur_ref_entity]
+      next unless ref_index
+      result.each do |r|
+        r[res_ref_entity] = ref_index.search(attr: cur_ref_id, val: r["_id"])
+      end
+    end
+  end
+  #Annotates the search results
+  def add_one_to_one_reference_entities(result, index:)
+    ref_config = search_service_hash[index][:one_to_one_reference_config]
     return unless ref_config
     ref_config.each do |ref_hash|
       cur_ref_id = ref_hash["reference_id"]
