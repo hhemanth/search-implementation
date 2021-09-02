@@ -5,10 +5,22 @@
       "signature",
       "tags"
     ],
-    "reference_config": [
+    "one_to_one_reference_config": [
       {
         "reference_id":  "organization_id",
         "reference_entity": "Organization"
+      }
+    ],
+    "one_to_many_reference_config": [
+      {
+        "reference_id":  "submitter_id",
+        "reference_entity": "Ticket",
+        "result_term": "tickets_submitted"
+      },
+      {
+        "reference_id":  "assignee_id",
+        "reference_entity": "Ticket",
+        "result_term": "tickets_assigned"
       }
     ]
   }

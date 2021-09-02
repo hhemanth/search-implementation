@@ -5,6 +5,13 @@
       "domain_names",
       "details",
       "tags"
+    ],
+    "one_to_many_reference_config": [
+      {
+        "reference_id": "organization_id",
+        "reference_entity": "User",
+        "result_term": "users"
+      }
     ]
   }
 }
