@@ -9,23 +9,15 @@ require 'pry'
 class DocumentIndex
   attr_accessor :index_name,:options,  :src_index, :attribute_index_hash, :tokenize_list
 
-  def initialize(index_name, options={})
+  def initialize(index_name, iconfig=nil)
     @index_name = index_name
     @options = options
     @src_index = SrcIndex.new(index_name)
     @attribute_index_hash = {}
-    load_schema
+    @tokenize_list = iconfig&.tokenize_list || []
+    # load_schema
   end
 
-  def load_schema
-    if options.nil?  || options[:schema].nil?
-      @tokenize_list = []
-    else
-      schema = options[:schema]
-      @tokenize_list = schema[:tokenize_list] || []
-    end
-
-  end
 
   def no_documents
     src_index.no_documents

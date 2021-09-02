@@ -6,7 +6,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 RSpec.describe DocumentIndex do
 
   let(:index_name) {'User'}
-  let(:options) { {schema: {tokenize_list: ["subject", "description", "tags"]}}}
+  let(:options) { double("IConfig", :tokenize_list => ["subject", "description", "tags"]) }
   let(:document_index) {DocumentIndex.new(index_name, options)}
   let(:document1) {
     {

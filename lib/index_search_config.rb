@@ -11,6 +11,10 @@ class IndexSearchConfig
     parse_config
   end
 
+  def indices
+    search_config_hash.keys
+  end
+
   def valid?
     search_config_hash.keys.each do |index|
       config_file(index).present? && data_file(index).present?
@@ -38,7 +42,7 @@ class IndexSearchConfig
   end
 
   def schema_tokenize_list(index)
-    cur_config(index).schema["tokenize_list"]
+    cur_config(index).tokenize_list
   end
 
   def one_to_one_reference_config(index)
@@ -57,6 +61,9 @@ class IndexSearchConfig
     Dir::pwd + '/' + search_option[:data_file]
   end
 
+  def cur_config(index)
+    search_config_hash[index]
+  end
 
 
   class IConfig
@@ -81,9 +88,5 @@ class IndexSearchConfig
     end
   end
 
-  private
 
-  def cur_config(index)
-    search_config_hash[index]
-  end
 end

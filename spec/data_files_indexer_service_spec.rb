@@ -36,10 +36,10 @@ RSpec.describe DataFilesIndexerService do
 
       context 'index multiple files' do
         it 'should return correct data_file and confix file' do
-          search_hash = data_files_indexer_service.search_service_hash.with_indifferent_access
-          expect(search_hash.keys).to match_array(%w[User Organization Ticket])
-          expect(search_hash['User']['data_file']).to include('users.json')
-          expect(search_hash['User']['config_file']).to include('user_search_config.json')
+          search_config = data_files_indexer_service.search_config
+          expect(search_config.indices).to match_array(%w[User Organization Ticket])
+          expect(search_config.data_file("User")).to include('users.json')
+          expect(search_config.config_file("User")).to include('user_search_config.json')
         end
       end
     end

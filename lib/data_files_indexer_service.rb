@@ -1,33 +1,15 @@
 require 'pry'
 require 'json'
 require_relative './document_index'
+require_relative './index_search_config'
 class DataFilesIndexerService
-  attr_accessor :search_options, :search_service_hash, :doc_indices_hash
+  attr_accessor :search_options, :search_service_hash, :doc_indices_hash, :search_config
 
   def initialize(search_options)
     @search_options = search_options
     @search_service_hash = {}
     @doc_indices_hash = {}
-    parse_search_options
-  end
-
-  def parse_search_options
-    search_options.each do |search_option|
-      search_index = search_option[:index_name]
-      config_file = config_file_path(search_option)
-      config = JSON.parse(File.read(config_file)).with_indifferent_access
-
-      search_service_hash[search_index] = {
-        data_file: data_file_path(search_option),
-        config_file: config_file_path(search_option),
-        one_to_one_reference_config: config[:schema][:one_to_one_reference_config],
-        one_to_many_reference_config: config[:schema][:one_to_many_reference_config]
-      }
-    end
-  end
-
-  def indices
-    search_service_hash.keys
+    @search_config = IndexSearchConfig.new(search_options)
   end
 
   def attributes(index)
@@ -41,15 +23,22 @@ class DataFilesIndexerService
   end
 
   def index_data_files!
-    search_service_hash.each do |search_index, search_params|
-      data_file = search_params[:data_file]
+    indices.each do |index|
+      doc_index = DocumentIndex.new(index, cur_config(index))
+      data_file = search_config.data_file(index)
       data = JSON.parse(File.read(data_file))
-      config_file = search_params[:config_file]
-      config = JSON.parse(File.read(config_file)).with_indifferent_access
-      doc_index = DocumentIndex.new(search_index, config)
       doc_index.index!(data)
-      doc_indices_hash[search_index] = doc_index
+      doc_indices_hash[index] = doc_index
     end
+  end
+
+
+  def indices
+    search_config.indices
+  end
+
+  def cur_config(index)
+    search_config.cur_config(index)
   end
 
   def search_global(term:nil)
@@ -59,7 +48,6 @@ class DataFilesIndexerService
     end
     result
   end
-
 
   def search(index:nil, attr:nil, term:nil)
     doc_index = doc_indices_hash[index]
@@ -73,8 +61,7 @@ class DataFilesIndexerService
   end
 
   def add_one_to_many_reference_entities(result, index:)
-    ref_config = search_service_hash[index][:one_to_many_reference_config]
-
+    ref_config = cur_config(index).one_to_many_reference_config
 
     return unless ref_config
     ref_config.each do |ref_hash|
@@ -90,7 +77,7 @@ class DataFilesIndexerService
   end
   #Annotates the search results
   def add_one_to_one_reference_entities(result, index:)
-    ref_config = search_service_hash[index][:one_to_one_reference_config]
+    ref_config = cur_config(index).one_to_one_reference_config
     return unless ref_config
     ref_config.each do |ref_hash|
       cur_ref_id = ref_hash["reference_id"]
@@ -106,13 +93,6 @@ class DataFilesIndexerService
 
   private
 
-  def data_file_path(search_option)
-    Dir::pwd + '/' + search_option[:data_file]
-  end
-
-  def config_file_path(search_option)
-    Dir::pwd + '/' + search_option[:config_file]
-  end
 
   def get_result_ref_entity(ref_id)
     ref_id.split("_id").first.capitalize
