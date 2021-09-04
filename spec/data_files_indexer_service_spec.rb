@@ -61,7 +61,7 @@ RSpec.describe DataFilesIndexerService do
       context 'Invalid Json file is provided' do
         it 'raises an exception' do
           expect{data_files_indexer_service.index_data_files!}.to raise_error(DataFilesIndexerService::ConfigInvalid)
-          expect(data_files_indexer_service.errors).to eq([data_file_param_empty(index_name)])
+          expect(data_files_indexer_service.errors).to include(data_file_param_empty(index_name))
         end
       end
 

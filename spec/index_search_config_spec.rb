@@ -53,7 +53,7 @@ RSpec.describe IndexSearchConfig do
         let(:config) { "config" }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq([config_incorrect_format])
+          expect(index_search_config.errors).to include(config_incorrect_format)
         end
       end
 
@@ -71,7 +71,7 @@ RSpec.describe IndexSearchConfig do
         }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq([data_file_param_empty(index_name)])
+          expect(index_search_config.errors).to include(data_file_param_empty(index_name))
         end
       end
 
@@ -89,9 +89,64 @@ RSpec.describe IndexSearchConfig do
         }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq([config_file_param_empty(index_name)])
+          expect(index_search_config.errors).to include(config_file_param_empty(index_name))
         end
       end
+
+      context 'data file is doesnt exist in the specified location' do
+        let!(:index_name) { 'User'}
+        let!(:config) {
+          [
+            {
+              index_name: 'User',
+              data_file: 'spec/fixtures/dataset1/users1.json',
+              config_file: 'spec/fixtures/dataset1/user_search_config.json',
+
+            }
+          ]
+        }
+        it 'returns false' do
+          expect(index_search_config.valid?).to be_falsey
+          expect(index_search_config.errors).to include(data_file_doesnt_exist(index_name))
+        end
+      end
+
+      context 'data file is doesnt exist in the specified location' do
+        let!(:index_name) { 'Organization'}
+        let!(:config) {
+          [
+            {
+              index_name: 'Organization',
+              data_file: 'spec/fixtures/dataset2/organizations.json',
+              config_file: 'spec/fixtures/dataset2/organization_search_config.json',
+
+            }
+          ]
+        }
+        it 'returns false' do
+          expect(index_search_config.valid?).to be_falsey
+          expect(index_search_config.errors).to include(config_file_not_json(index_name))
+        end
+      end
+
+      context 'Mandatory keys missing from config' do
+        let!(:index_name) { 'User'}
+        let!(:config) {
+          [
+            {
+              config_file: 'spec/fixtures/dataset2/organizations_search_config.json',
+
+            }
+          ]
+        }
+        it 'returns false' do
+          expect(index_search_config.valid?).to be_falsey
+          expect(index_search_config.errors).to include(mandatory_keys_missing_in_option)
+        end
+      end
+
+
+
 
       context 'index is empty' do
 

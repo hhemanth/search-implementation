@@ -14,4 +14,26 @@ module ErrorMsg
   def config_incorrect_format
     "config provided is not in the correct format. It should be an array of hashes"
   end
+
+  def config_file_doesnt_exist(index)
+    "Config file for index #{index} is not present in the location specified"
+  end
+
+  def data_file_doesnt_exist(index)
+    "Data file for index #{index} is not present in the location specified"
+  end
+
+  def config_file_not_json(index)
+    "Config file for index #{index} is not a JSON"
+  end
+
+  def data_file_not_json(index)
+    "Data file for index #{index} is not a JSON"
+  end
+
+  def mandatory_keys_missing_in_option
+    "The following mandatory keys are missing in the options provided -> index_name, data_file, config_file"
+  end
+
+
 end

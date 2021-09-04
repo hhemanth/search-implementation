@@ -1,0 +1,30 @@
+{
+  "schema": {
+    "tokenize_list": [
+      "subject",
+      "description",
+      "tags"
+    ],
+    "one_to_many_reference_config": [
+      {
+        "reference_id":  "organization_id",
+        "reference_entity": "Ticket",
+        "result_term": "tickets"
+      }
+    ],
+    "one_to_one_reference_config": [
+      {
+        "reference_id":  "organization_id",
+        "reference_entity": "Organization"
+      },
+      {
+        "reference_id": "assignee_id",
+        "reference_entity": "User"
+      },
+      {
+        "reference_id": "submitter_id",
+        "reference_entity": "User"
+      }
+    ]
+  }
+}

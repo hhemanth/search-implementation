@@ -16,6 +16,7 @@ search_options =
         },
         {
             index_name: 'Organization',
+            data_file: 'data/organizations.json',
             config_file: 'data/organization_search_config.json'
         },
         {

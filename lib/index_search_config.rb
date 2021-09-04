@@ -1,6 +1,13 @@
-#stores, parses and validates Docuemnt config
-# checkes if data file and config file is present and valid
-# return tokenize_list & reference_config
+#This class stores and validates config for a Index
+# It validates data file, config file and the contents of the config file
+# It validates the following
+# config_file is present
+# data_file is present
+# conifg file is valid json
+# data file is valid json
+# config file has needed keys
+# data file is an array of hashes
+
 require 'json'
 require 'active_support'
 require_relative './error_msg'
@@ -9,6 +16,7 @@ class IndexSearchConfig
   include ErrorMsg
 
   attr_accessor :config, :search_config_hash, :errors
+
   def initialize(config)
     @config = config
     @errors = []
@@ -25,8 +33,8 @@ class IndexSearchConfig
     if !config.is_a?(Array)
       @errors << config_incorrect_format
     end
-    search_config_hash.each {|index, config| config.valid?}
-    @errors << search_config_hash.flat_map{|index, config| config.errors}
+    search_config_hash.each { |index, config| config.valid? }
+    @errors << search_config_hash.flat_map { |index, config| config.errors }
     @errors.flatten!&.reject!(&:empty?)&.uniq!
     return @errors.empty?
   end
@@ -34,23 +42,19 @@ class IndexSearchConfig
   def parse_config
     return unless valid?
     config.each do |search_option|
+      next unless option_keys_valid?(search_option)
       search_index = search_option[:index_name]
-      if search_option[:config_file].empty?
-        @errors << config_file_param_empty(search_index)
-        next
-      end
-      config_file = config_file_path(search_option)
-      begin
-        iconfig = IConfig.new(index:search_index,
-                    data_file: data_file_path(search_option) ,
-                    config_file: config_file_path(search_option),
-                    schema: JSON.parse(File.read(config_file)).with_indifferent_access)
-        search_config_hash[search_index] = iconfig
-      rescue JSON::ParserError => e
-        @errors << config_file_incorrect_format(search_index)
-      end
+      search_config_hash[search_index] = IConfig.new(search_option)
+    end
+  end
+
+  def option_keys_valid?(option)
+    if option.keys.map(&:to_s).sort != %w[config_file data_file index_name]
+      @errors << mandatory_keys_missing_in_option
+      return false
 
     end
+    return true
   end
 
   def config_file(index)
@@ -94,46 +98,44 @@ class IndexSearchConfig
   class IConfig
     include ErrorMsg
     attr_accessor :index, :data_file, :config_file, :schema, :errors
-    def initialize(index:, data_file:, config_file:, schema:)
-      @index = index
+
+    def initialize(index_name:, data_file:, config_file:)
+      @index = index_name
       @data_file = data_file
       @config_file = config_file
-      @schema = schema["schema"]
       @errors = []
-      @is_valid = true
+      parse_config if valid?
     end
 
-    # config_file is present
-    # data_file is present
-    # conifg file is valid json
-    # data file is valid json
-    # config file has needed keys
-    # data file is an array of hashes
-    def valid?
-      if empty_or_nil?(data_file)
-        errors << data_file_param_empty(index)
-      end
-      # if empty_or_nil?(config_file)
-      #   errors << "Config file parameter for index #{index} is an empty string"
-      # end
+    def parse_config
+      config = JSON.parse(File.read(config_file)).with_indifferent_access
+      @schema = config[:schema]
+    end
 
-      # if file_present?(config_file)
-      #   errors << "Config file for index #{index} is not present"
-      # end
-      #
-      # if file_present?(data_file)
-      #   errors << "Config file for index #{index} is not present"
-      # end
-      #
-      # if json_file?(config_file)
-      #   errors << "Config file for index #{index} is not in the correct format, not a json file"
-      # end
-      #
-      # if config_file_correct_format?
-      #   errors << "Config file for index #{index} is not in the correct format, Does not have the required keys"
-      # end
+    def valid?
+      errors << data_file_param_empty(index) if empty_or_nil?(data_file)
+      return false unless errors.empty?
+      errors << config_file_param_empty(index) if empty_or_nil?(config_file)
+      return false unless errors.empty?
+      errors << config_file_doesnt_exist(index) unless File.file?(config_file)
+      return false unless errors.empty?
+      errors << data_file_doesnt_exist(index) unless File.file?(data_file)
+      return false unless errors.empty?
+      errors << config_file_not_json(index) unless json_file?(config_file)
+      return false unless errors.empty?
+      errors << data_file_not_json(index) unless json_file?(data_file)
+
       return errors.empty?
 
+    end
+
+    def json_file?(f)
+      begin
+        JSON.parse(File.read(f))
+        return true
+      rescue JSON::ParserError => e
+        return false
+      end
     end
 
     def tokenize_list
@@ -154,6 +156,5 @@ class IndexSearchConfig
       f.nil? || f == ''
     end
   end
-
 
 end
