@@ -2,8 +2,9 @@ require 'rspec'
 require 'index_search_config'
 require 'pry'
 require 'active_support/core_ext/hash/indifferent_access'
-
+require 'error_msg'
 RSpec.describe IndexSearchConfig do
+  include ErrorMsg
   let(:index_search_config) { IndexSearchConfig.new(config) }
   let!(:index_name) { 'Organization' }
   let(:config) {
@@ -52,7 +53,7 @@ RSpec.describe IndexSearchConfig do
         let(:config) { "config" }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq(["config provided is not in the correct format. It should be an array of hashes"])
+          expect(index_search_config.errors).to eq([config_incorrect_format])
         end
       end
 
@@ -86,7 +87,7 @@ RSpec.describe IndexSearchConfig do
         }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq(["Data file parameter for index User is an empty string"])
+          expect(index_search_config.errors).to eq(["Config file parameter for index User is an empty string"])
         end
       end
 
