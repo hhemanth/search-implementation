@@ -35,5 +35,9 @@ module ErrorMsg
     "The following mandatory keys are missing in the options provided -> index_name, data_file, config_file"
   end
 
+  def index_name_empty
+    "index_name in one of the config is empty"
+  end
+
 
 end

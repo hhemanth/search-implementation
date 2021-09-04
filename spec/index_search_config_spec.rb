@@ -149,6 +149,20 @@ RSpec.describe IndexSearchConfig do
 
 
       context 'index is empty' do
+        let!(:config) {
+          [
+            {
+              index_name: '',
+              data_file: 'spec/fixtures/dataset2/organizations.json',
+              config_file: 'spec/fixtures/dataset2/organization_search_config.json',
+
+            }
+          ]
+        }
+        it 'returns false' do
+          expect(index_search_config.valid?).to be_falsey
+          expect(index_search_config.errors).to include(index_name_empty)
+        end
 
       end
 

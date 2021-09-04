@@ -113,6 +113,8 @@ class IndexSearchConfig
     end
 
     def valid?
+      errors << index_name_empty if empty_or_nil?(index)
+      return false unless errors.empty?
       errors << data_file_param_empty(index) if empty_or_nil?(data_file)
       return false unless errors.empty?
       errors << config_file_param_empty(index) if empty_or_nil?(config_file)
