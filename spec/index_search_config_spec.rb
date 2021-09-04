@@ -58,6 +58,7 @@ RSpec.describe IndexSearchConfig do
       end
 
       context 'data file is empty' do
+        let!(:index_name) { 'User'}
         let!(:config) {
           [
             {
@@ -70,11 +71,12 @@ RSpec.describe IndexSearchConfig do
         }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq(["Data file parameter for index User is an empty string"])
+          expect(index_search_config.errors).to eq([data_file_param_empty(index_name)])
         end
       end
 
       context 'config file is empty' do
+        let!(:index_name) { 'User'}
         let!(:config) {
           [
             {
@@ -87,7 +89,7 @@ RSpec.describe IndexSearchConfig do
         }
         it 'returns false' do
           expect(index_search_config.valid?).to be_falsey
-          expect(index_search_config.errors).to eq(["Config file parameter for index User is an empty string"])
+          expect(index_search_config.errors).to eq([config_file_param_empty(index_name)])
         end
       end
 

@@ -16,7 +16,6 @@ search_options =
         },
         {
             index_name: 'Organization',
-            data_file: 'data/organizations.json',
             config_file: 'data/organization_search_config.json'
         },
         {
@@ -27,9 +26,16 @@ search_options =
 
     ]
 
+begin
+  data_indexer_service = DataFilesIndexerService.new(search_options)
+  data_indexer_service.index_data_files!
+rescue StandardError => e
+  puts "********Something went Wrong*******"
+  puts data_indexer_service.errors
+  exit
+end
 
-data_indexer_service = DataFilesIndexerService.new(search_options)
-data_indexer_service.index_data_files!
+
 SearchServiceCli.new(data_indexer_service).run
 
 

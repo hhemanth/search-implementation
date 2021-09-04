@@ -5,11 +5,22 @@ require_relative './index_search_config'
 class DataFilesIndexerService
   attr_accessor :search_options, :search_service_hash, :doc_indices_hash, :search_config
 
+  class ConfigInvalid < StandardError
+  end
+
   def initialize(search_options)
     @search_options = search_options
     @search_service_hash = {}
     @doc_indices_hash = {}
     @search_config = IndexSearchConfig.new(search_options)
+  end
+
+  def config_valid?
+    search_config.valid?
+  end
+
+  def errors
+    search_config.errors
   end
 
   def attributes(index)
@@ -23,6 +34,7 @@ class DataFilesIndexerService
   end
 
   def index_data_files!
+    raise ConfigInvalid unless config_valid?
     indices.each do |index|
       doc_index = DocumentIndex.new(index, cur_config(index))
       data_file = search_config.data_file(index)
@@ -30,6 +42,7 @@ class DataFilesIndexerService
       doc_index.index!(data)
       doc_indices_hash[index] = doc_index
     end
+    return true
   end
 
 

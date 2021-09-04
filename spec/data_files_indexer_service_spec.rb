@@ -3,6 +3,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 require 'data_files_indexer_service'
 
 RSpec.describe DataFilesIndexerService do
+  include ErrorMsg
   let(:data_files_indexer_service) { DataFilesIndexerService.new(options) }
 
   let(:options) {
@@ -45,8 +46,23 @@ RSpec.describe DataFilesIndexerService do
     end
 
     context 'An invalid Search Service hash is provided' do
-      context 'Invalid Json file is provided' do
+      let!(:index_name) { 'User'}
+      let(:options) {
+        [
+          {
+            index_name: 'User',
+            data_file: '',
+            config_file: 'spec/fixtures/dataset1/user_search_config.json',
 
+          }
+        ]
+      }
+
+      context 'Invalid Json file is provided' do
+        it 'raises an exception' do
+          expect{data_files_indexer_service.index_data_files!}.to raise_error(DataFilesIndexerService::ConfigInvalid)
+          expect(data_files_indexer_service.errors).to eq([data_file_param_empty(index_name)])
+        end
       end
 
       context 'Data file is not present' do

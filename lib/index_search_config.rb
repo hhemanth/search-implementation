@@ -3,7 +3,7 @@
 # return tokenize_list & reference_config
 require 'json'
 require 'active_support'
-require 'error_msg'
+require_relative './error_msg'
 
 class IndexSearchConfig
   include ErrorMsg
@@ -74,17 +74,21 @@ class IndexSearchConfig
   end
 
   def config_file_path(search_option)
-    return search_option[:config_file] if search_option[:config_file].empty?
+    return search_option[:config_file] if empty_or_nil?(search_option[:config_file])
     Dir::pwd + '/' + search_option[:config_file]
   end
 
   def data_file_path(search_option)
-    return search_option[:data_file] if search_option[:data_file].empty?
+    return search_option[:data_file] if empty_or_nil?(search_option[:data_file])
     Dir::pwd + '/' + search_option[:data_file]
   end
 
   def cur_config(index)
     search_config_hash[index]
+  end
+
+  def empty_or_nil?(f)
+    f.nil? || f == ''
   end
 
   class IConfig
