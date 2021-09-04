@@ -2,6 +2,7 @@ require 'pry'
 require 'json'
 require_relative './document_index'
 require_relative './index_search_config'
+require_relative './annotate_search_results'
 class DataFilesIndexerService
   attr_accessor :search_options, :search_service_hash, :doc_indices_hash, :search_config
 
@@ -67,49 +68,44 @@ class DataFilesIndexerService
     result = search_tokens(term).flat_map do |t|
       doc_index.search(attr: attr, val: t)
     end
-
-    add_one_to_one_reference_entities(result, index: index)
-    add_one_to_many_reference_entities(result, index: index)
+    annotate_result = AnnotateSearchResults.new(doc_indices_hash, search_config)
+    annotate_result.run!(result, index: index)
     result
+
   end
 
-  def add_one_to_many_reference_entities(result, index:)
-    ref_config = cur_config(index).one_to_many_reference_config
-
-    return unless ref_config
-    ref_config.each do |ref_hash|
-      cur_ref_id = ref_hash["reference_id"]
-      cur_ref_entity = ref_hash["reference_entity"]
-      res_ref_entity = ref_hash["result_term"]
-      ref_index = doc_indices_hash[cur_ref_entity]
-      next unless ref_index
-      result.each do |r|
-        r[res_ref_entity] = ref_index.search(attr: cur_ref_id, val: r["_id"])
-      end
-    end
-  end
-  #Annotates the search results
-  def add_one_to_one_reference_entities(result, index:)
-    ref_config = cur_config(index).one_to_one_reference_config
-    return unless ref_config
-    ref_config.each do |ref_hash|
-      cur_ref_id = ref_hash["reference_id"]
-      cur_ref_entity = ref_hash["reference_entity"]
-      res_ref_entity = get_result_ref_entity(cur_ref_id)
-      ref_index = doc_indices_hash[cur_ref_entity]
-      next unless ref_index
-      result.each do |r|
-        r[res_ref_entity] = ref_index.get(r[cur_ref_id])
-      end
-    end
-  end
+  # def add_one_to_many_reference_entities(result, index:)
+  #   ref_config = cur_config(index).one_to_many_reference_config
+  #
+  #   return unless ref_config
+  #   ref_config.each do |ref_hash|
+  #     cur_ref_id = ref_hash["reference_id"]
+  #     cur_ref_entity = ref_hash["reference_entity"]
+  #     res_ref_entity = ref_hash["result_term"]
+  #     ref_index = doc_indices_hash[cur_ref_entity]
+  #     next unless ref_index
+  #     result.each do |r|
+  #       r[res_ref_entity] = ref_index.search(attr: cur_ref_id, val: r["_id"])
+  #     end
+  #   end
+  # end
+  # #Annotates the search results
+  # def add_one_to_one_reference_entities(result, index:)
+  #   ref_config = cur_config(index).one_to_one_reference_config
+  #   return unless ref_config
+  #   ref_config.each do |ref_hash|
+  #     cur_ref_id = ref_hash["reference_id"]
+  #     cur_ref_entity = ref_hash["reference_entity"]
+  #     res_ref_entity = get_result_ref_entity(cur_ref_id)
+  #     ref_index = doc_indices_hash[cur_ref_entity]
+  #     next unless ref_index
+  #     result.each do |r|
+  #       r[res_ref_entity] = ref_index.get(r[cur_ref_id])
+  #     end
+  #   end
+  # end
 
   private
-
-
-  def get_result_ref_entity(ref_id)
-    ref_id.split("_id").first.capitalize
-  end
 
   def search_tokens(input_text)
     return [''] if input_text.to_s.strip == ''
