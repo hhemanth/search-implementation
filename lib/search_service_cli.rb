@@ -56,13 +56,27 @@ class SearchServiceCli
 
   def print_hash_as_table(search_results)
     search_results.each do |result|
-      table = TTY::Table.new(header: ["Attribute", "Value"])
-      result.each do |k,v|
-        v = v.to_s[0,100] if v.to_s.size >100
-        table << [k,v]
-      end
+      table = print_table(result)
       puts table.render(:unicode)
+
+      result.each do |k,v|
+        if v.is_a?(Hash)
+          puts "************** #{k}***************"
+          t = print_table(v)
+          puts t.render(:unicode)
+        end
+      end
+
     end
+  end
+
+  def print_table(result)
+    table = TTY::Table.new(header: ["Attribute", "Value"])
+    result.each do |k, v|
+      v = v.to_s[0, 100] if v.to_s.size > 100
+      table << [k, v]
+    end
+    table
   end
 
   def view_searchable_fields
