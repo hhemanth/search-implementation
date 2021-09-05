@@ -172,7 +172,7 @@ RSpec.describe DataFilesIndexerService do
 
         it 'should return all records with any or all of the terms' do
           search_results = data_files_indexer_service.search(index: 'Ticket', term: 'A Nuisance in Nicaragua')
-          expect(search_results.count).to eq(49)
+          expect(search_results.count).to eq(48)
           expect(search_results.map { |s| s["subject"] }.uniq).to include("A Nuisance in Nicaragua")
         end
 
@@ -214,7 +214,7 @@ RSpec.describe DataFilesIndexerService do
           expect(search_results.keys).to match_array(%w(Ticket Organization User))
           expect(search_results['User'].map { |s| s["_id"] }).to match_array([])
           expect(search_results['Organization'].map { |s| s["_id"] }).to match_array([])
-          expect(search_results['Ticket'].count).to eq(49)
+          expect(search_results['Ticket'].count).to eq(48)
           expect(search_results['Ticket'].map { |s| s["subject"] }.uniq).to include("A Nuisance in Nicaragua")
         end
       end
