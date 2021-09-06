@@ -1,5 +1,9 @@
 This is implementation of Basic Search from scratch. This is a CLI app. 
 
+##Contents
+
+
+
 ### Running the specs
 ```shell
 git clone git@github.com:hhemanth/search-implementation.git
@@ -17,6 +21,7 @@ bundle
 ruby main.rb
 ```
 ### Indexing and Searching
+#### Indexing
 - DataFilesIndexerService is the entry point class. It accepts a options parameter which has the following format 
 ```javascript
 options = {
@@ -97,78 +102,44 @@ search_results = data_files_indexer_service.search_global(term: 'A Nuisance in N
 search_results = data_files_indexer_service.search_global(term: '')
 search_results = data_files_indexer_service.search_global(term: nil) # same as above
 ```
-
-### About Design & Implementation
-
-- The class DataFilesIndexerService is the entry class and also the integration service for Search implementation.
-- As explained in the previous section, indexing and search can be performed using this class APIs.
-- DataFilesIndexerService uses the following classes to build the index and search
-    - DocumentIndex - DataFilesIndexerService maintains one DocumentIndex object per data file indexed
-        - SrcIndex - DocumentIndex maintains one SrcIndex object. This is a hash, where the key is the id, and value is the whole record/ docuemnt
-        - AttributeIndex - DocumentIndex maintains one AttributeIndex object for every attribute in the document. This is a hash, where key is the search term, and value is a hash 
-
-### Validations 
+### Validations
 We have the following validations now
 
 - config_file key in the config param pased has to be present
 - data_file key in the config param pased has to be present
 - config_file exists and is a valid json
-- data_file exists and is a valid json - Array of Hashes 
+- data_file exists and is a valid json - Array of Hashes
 - config file has needed keys
 - data file is an array of hashes
 
-### prerequisites
-- Data and Config files have to be placed in "data" directory
-- data file is in `json` format. It has to be an array of hashes.
-- Each hash inside the "Array of Hashes" inside the data file (json file), represnt a record.
-- The only requirement is that each record has an "_id" field to represent the id of the record.
-- The application is designed in way that it can index arbitrary fields and arbitrary records.
+### About Design & Implementation
 
+![Search Index Storage](readme_images/search_design_architecture.jpeg)
 
-Sample data file which has 2 records (taken from organizations.json). 
+- The class **DataFilesIndexerService** is the entry class and also the integration service for **Search implementation**.
+- As explained in the previous section, indexing and search can be performed using this class APIs.
+- **DataFilesIndexerService** uses the following classes to build the index and search
+    - **DocumentIndex** - DataFilesIndexerService maintains one DocumentIndex object per data file indexed
+        - **SrcIndex** - **DocumentIndex** maintains one **SrcIndex** object. This is a hash, where the key is the id, and value is the whole record/ docuemnt
+        - **AttributeIndex** - **DocumentIndex** maintains one **AttributeIndex** object for every attribute in the document. 
+          This is a hash, where key is the search term, and value is an array of document ids where the term is found.
+          the below diagram can do justice to it. **This is the actual search index to do the actual search.**
+    - **IndexSearchConfig** -  DataFilesIndexerService maintains one **IndexSearchConfig** object to store the schema. 
+      Which is derived from the options passed onto DataFilesIndexerService  
+
+      
+Sample data file which has 2 records (taken from organizations.json & most fields stripped). 
 
 ```[
      {
        "_id": 101,
-       "url": "http://initech.zendesk.com/api/v2/organizations/101.json",
-       "external_id": "9270ed79-35eb-4a38-a46f-35725197ea8d",
        "name": "Enthaze",
-       "domain_names": [
-         "kage.com",
-         "ecratic.com",
-         "endipin.com",
-         "zentix.com"
-       ],
-       "created_at": "2016-05-21T11:10:28 -10:00",
        "details": "MegaCorp",
-       "shared_tickets": false,
-       "tags": [
-         "Fulton",
-         "West",
-         "Rodriguez",
-         "Farley"
-       ]
      },
      {
        "_id": 102,
-       "url": "http://initech.zendesk.com/api/v2/organizations/102.json",
-       "external_id": "7cd6b8d4-2999-4ff2-8cfd-44d05b449226",
        "name": "Nutralab",
-       "domain_names": [
-         "trollery.com",
-         "datagen.com",
-         "bluegrain.com",
-         "dadabase.com"
-       ],
-       "created_at": "2016-04-07T08:21:44 -10:00",
        "details": "Non profit",
-       "shared_tickets": false,
-       "tags": [
-         "Cherry",
-         "Collier",
-         "Fuentes",
-         "Trevino"
-       ]
      }
      ]
  ```
@@ -180,9 +151,7 @@ Each data file has to accompanied by a config file. The config file should conta
  "schema": {
    "tokenize_list": [
      "name",
-     "domain_names",
      "details",
-     "tags"
    ]
  }
 }
@@ -204,57 +173,17 @@ The SrcIndex is as follows
 ```
 "101" => {
           "_id": 101,
-          "url": "http://initech.zendesk.com/api/v2/organizations/101.json",
-          "external_id": "9270ed79-35eb-4a38-a46f-35725197ea8d",
           "name": "Enthaze",
-          "domain_names": [
-            "kage.com",
-            "ecratic.com",
-            "endipin.com",
-            "zentix.com"
-          ],
-          "created_at": "2016-05-21T11:10:28 -10:00",
           "details": "MegaCorp",
-          "shared_tickets": false,
-          "tags": [
-            "Fulton",
-            "West",
-            "Rodriguez",
-            "Farley"
-          ]
         },
 "102=> {
           "_id": 102,
-          "url": "http://initech.zendesk.com/api/v2/organizations/102.json",
-          "external_id": "7cd6b8d4-2999-4ff2-8cfd-44d05b449226",
           "name": "Nutralab",
-          "domain_names": [
-            "trollery.com",
-            "datagen.com",
-            "bluegrain.com",
-            "dadabase.com"
-          ],
-          "created_at": "2016-04-07T08:21:44 -10:00",
           "details": "Non profit",
-          "shared_tickets": false,
-          "tags": [
-            "Cherry",
-            "Collier",
-            "Fuentes",
-            "Trevino"
-          ]
     }
 ```
 
 The Attribute indices for few attributes look like this 
-### external_id 
-
-```ruby
-{
-    "9270ed79-35eb-4a38-a46f-35725197ea8d": [1],
-    "7cd6b8d4-2999-4ff2-8cfd-44d05b449226": [2]
-}
-```
 
 ### name
 
@@ -266,20 +195,5 @@ The Attribute indices for few attributes look like this
 
 ```
 
-### tags
-```ruby
-{
-    "cherry": [2],
-    "collier": [2],
-    "fuentes": [2],
-    "trevino": [2],
-    "fulton": [1],
-    "west": [1],
-    "rodriguez": [1],
-    "farley": [1]
-
-}
-
-```
 
 With the help of the above indices, we can search for any terms present in the document and return the results. If the search term is not present, then we return an empty response. 
