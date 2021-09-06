@@ -14,6 +14,15 @@ This is implementation of Basic Search from scratch. This is a CLI app.
 
 <img src="./readme_images/search_an_index_detailed_display.png" alt="drawing" width="400"/>
 
+### Global Search
+
+<img src="./readme_images/search_global.png" alt="drawing" width="400"/>
+
+### Global Search: Empty Value
+
+<img src="./readme_images/search_global_for_empty.png" alt="drawing" width="400"/>
+
+
 ### Exception Handling
 
 <img src="./readme_images/exception_handling.png" alt="drawing" width="400"/>
