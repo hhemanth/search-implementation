@@ -3,6 +3,7 @@ require 'pastel'
 require 'tty-prompt'
 require 'tty-progressbar'
 require 'tty-table'
+require 'tty-pager'
 require 'active_support/core_ext/hash/indifferent_access'
 
 class SearchServiceCli
@@ -10,6 +11,8 @@ class SearchServiceCli
 
   def initialize(data_files_indexer_service)
     @data_files_indexer_service = data_files_indexer_service
+    prompt = -> (page) { "Page -#{page_num}- Press enter to continue" }
+    @pager = TTY::Pager::BasicPager.new(width: 180)
     initialize_cli
   end
 
@@ -54,20 +57,34 @@ class SearchServiceCli
     puts table.render(:unicode)
   end
 
-  def print_hash_as_table(search_results)
+  def print_all_results_as_single_table(index: ,search_results:)
+    table = TTY::Table.new(header: ["Attribute", "Value"])
     search_results.each do |result|
       table = print_table(result)
-      puts table.render(:unicode)
-
-      result.each do |k,v|
-        if v.is_a?(Hash)
-          puts "************** #{k}***************"
-          t = print_table(v)
-          puts t.render(:unicode)
-        end
-      end
+    end
 
     end
+  def print_hash_as_table(search_results)
+    begin
+      search_results.each do |result|
+        table = print_table(result)
+        @pager.puts table.render(:unicode)
+
+        result.each do |k, v|
+          if v.is_a?(Hash)
+            @pager.puts "************** #{k}***************"
+            t = print_table(v)
+            @pager.puts t.render(:unicode)
+          end
+        end
+
+      end
+
+    rescue TTY::Pager::PagerClosed
+    ensure
+      @pager.close
+    end
+
   end
 
   def print_table(result)
