@@ -1,6 +1,5 @@
 This is implementation of Basic Search from scratch. This is a CLI app. 
 
-##Contents
 
 ## Summary 
 This is a very simple implementation Search. Search is a vast topic and can get very complicated very fast.
@@ -10,7 +9,7 @@ Schema is useful to specify
 - Which fields have a reference one-to-one mapping
 - Which fields have a reference one-to-many mapping
 
-**What I proud of ?**
+** What I proud of ? **
 - I am proud of the design. Search will work for arbitrary json files. given a config.
 - I am proud of README and comments inside the code, I can pick up and start running even after month or years due to this documentation & tests.
 - We can easily extend the design to include ranking of search results.
@@ -19,7 +18,7 @@ Schema is useful to specify
 - It scales pretty well , displaying search results, first displays summary results and then if you want displays detailed search results. 
 - The UI also highlights the term you searched for in the search results. 
 
-** What I am not proud of ?**
+** What I am not proud of ? **
 - The Search CLI code does not have tests, I really wanted to add tests but I ran out of time. 
 - I wanted to add more corner cases tests fot DataFilesIndexerService, but couldn't bcos of time.
 - I could not test for really large files. I don't know for what file size the app would break. 

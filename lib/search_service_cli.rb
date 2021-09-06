@@ -20,7 +20,7 @@ class SearchServiceCli
       puts @pastel.on_cyan("Indexing #{index}")
       progress_bar
     end
-
+    begin
     loop do
       user_input = prompt.select("Select Search Options:", ["Search Zendesk", "View Searchable Fields", "Quit"])
       break if user_input == "Quit"
@@ -29,6 +29,10 @@ class SearchServiceCli
       elsif user_input == "View Searchable Fields"
         view_searchable_fields
       end
+    end
+    rescue StandardError => e
+      puts @pastel.on_red("Something went wrong")
+      puts e.trace
     end
   end
 
@@ -80,25 +84,26 @@ class SearchServiceCli
       search_results.each do |result|
         table = print_table(result, term: term)
         @pager.puts table.render(:unicode)
-
-        result.each do |k, v|
-          if v.is_a?(Hash)
-            @pager.puts @pastel.on_green.bold("#{k}")
-            t = print_table(v)
-            @pager.puts t.render(:unicode)
-          elsif array_of_hash?(v)
-            @pager.puts @pastel.on_green.bold("#{k}")
-            @pager.puts print_all_results_as_single_table(index:nil, search_results: v)
-          end
-        end
-
+        print_ref_entities(result)
       end
-
     rescue TTY::Pager::PagerClosed
     ensure
       @pager.close
     end
 
+  end
+
+  def print_ref_entities(result)
+    result.each do |k, v|
+      if v.is_a?(Hash)
+        @pager.puts @pastel.on_green.bold("#{k}")
+        t = print_table(v)
+        @pager.puts t.render(:unicode)
+      elsif array_of_hash?(v)
+        @pager.puts @pastel.on_green.bold("#{k}")
+        @pager.puts print_all_results_as_single_table(index: nil, search_results: v)
+      end
+    end
   end
 
   def print_table(result, term: nil)
@@ -118,35 +123,45 @@ class SearchServiceCli
 
   def search_zendex
     index_to_search = prompt.select("Select", indices_to_search)
+    # search across all Indeices, global search
     if index_to_search == "Search all indices"
       value_to_search = prompt.ask("Enter Value to search:")
       search_results = data_files_indexer_service.search_global(term: value_to_search)
     else
+      #search in 1 Index
       attribute_to_search = prompt.select("Select Search term: ", attributes_arr(index_to_search))
       value_to_search = prompt.select("Enter or Select Search value?", ["Enter value"] + attribute_values(attribute_to_search, index_to_search))
       value_to_search = prompt.ask("Enter Value to search:") if value_to_search == "Enter value"
       search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, term: value_to_search.to_s)
     end
 
+    print_search_results_summary(attribute_to_search, index_to_search, search_results, value_to_search)
+    display_details = prompt.select("Do you want to display the detailed search results", ["Yes", "No"])
+    print_search_result_in_detail(search_results, value_to_search) if display_details == "Yes"
+  end
+
+  def print_search_result_in_detail(search_results, value_to_search)
+    if search_results.is_a?(Hash)
+      search_results.each do |index, results|
+        puts @pastel.bold.on_green("Results for  #{value_to_search} in #{index}")
+        print_hash_as_table(results, value_to_search)
+      end
+    else
+      puts @pastel.bold.on_blue("Results for  #{value_to_search} in #{index}")
+      print_hash_as_table(search_results, value_to_search)
+    end
+  end
+
+  def print_search_results_summary(attribute_to_search, index_to_search, search_results, value_to_search)
+    #Global search yields a hash, where key is Index and value is search_results( array of hashes)
     if search_results.is_a?(Hash)
       search_results.each do |index, results|
         puts @pastel.on_blue("Results for  #{value_to_search} in #{index}")
-          puts print_all_results_as_single_table(index:index_to_search, search_results: results )
+        puts print_all_results_as_single_table(index: index_to_search, search_results: results)
       end
     else
       puts @pastel.on_green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
-      puts print_all_results_as_single_table(index:index_to_search, search_results: search_results )
-    end
-    display_details = prompt.select("Do you want to display the detailed search results", ["Yes", "No"])
-
-    if display_details == "Yes"
-      if search_results.is_a?(Hash)
-        search_results.each do |index, results|
-          print_hash_as_table(results, value_to_search)
-        end
-      else
-        print_hash_as_table(search_results, value_to_search)
-      end
+      puts print_all_results_as_single_table(index: index_to_search, search_results: search_results)
     end
   end
 
