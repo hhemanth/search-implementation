@@ -33,7 +33,7 @@ class SearchServiceCli
     rescue StandardError => e
       puts @pastel.on_red("Something went wrong")
       puts e.inspect
-      puts e.backtrace.inspect
+      e.backtrace.inspect
     end
   end
 
@@ -148,7 +148,7 @@ class SearchServiceCli
         print_hash_as_table(results, value_to_search)
       end
     else
-      puts @pastel.bold.on_blue("Results for  #{value_to_search} in #{index_to_sea}")
+      puts @pastel.bold.on_blue("Results for  #{value_to_search} in #{index_to_search}")
       print_hash_as_table(search_results, value_to_search)
     end
   end
