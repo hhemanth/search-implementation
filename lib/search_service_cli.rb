@@ -38,7 +38,7 @@ class SearchServiceCli
     @pastel = Pastel.new
     puts @pastel.on_blue("Welcome to Zendesk Search")
     @prompt = TTY::Prompt.new(active_color: 'magenta')
-    prompt = -> (page) { "Page -#{page_num}- Press enter to continue" }
+    # prompt = -> (page) { "Page -#{page_num}- Press enter to continue" }
     @pager = TTY::Pager::BasicPager.new(width: 180)
     @font = TTY::Font.new(:standard)
     puts @font.write("Zendesk Search")
@@ -62,6 +62,7 @@ class SearchServiceCli
   end
 
   def print_all_results_as_single_table(index:, search_results:)
+    return if search_results.size <= 0
     headers = search_results.first.keys.first(7)
     table = TTY::Table.new(header: headers)
     search_results.each do |res|
@@ -72,20 +73,23 @@ class SearchServiceCli
       end
       table << cols
     end
-    puts table.render(:unicode)
+    table.render(:unicode)
   end
 
-  def print_hash_as_table(search_results)
+  def print_hash_as_table(search_results, term)
     begin
       search_results.each do |result|
-        table = print_table(result)
+        table = print_table(result, term: term)
         @pager.puts table.render(:unicode)
 
         result.each do |k, v|
           if v.is_a?(Hash)
-            @pager.puts "************** #{k}***************"
+            @pager.puts @pastel.on_green.bold("#{k}")
             t = print_table(v)
             @pager.puts t.render(:unicode)
+          elsif array_of_hash?(v)
+            @pager.puts @pastel.on_green.bold("#{k}")
+            @pager.puts print_all_results_as_single_table(index:nil, search_results: v)
           end
         end
 
@@ -98,11 +102,11 @@ class SearchServiceCli
 
   end
 
-  def print_table(result)
+  def print_table(result, term: nil)
     table = TTY::Table.new(header: ["Attribute", "Value"].map{|h| @pastel.inverse(h)})
     result.each do |k, v|
-      v = v.to_s[0, 100] if v.to_s.size > 100
-      table << [@pastel.inverse(k), v]
+      v = @pastel.inverse(v.to_s) if (term && v.to_s.include?(term))
+      table << [k,v.to_s[0..100]]
     end
     table
   end
@@ -125,21 +129,26 @@ class SearchServiceCli
       search_results = data_files_indexer_service.search(index: index_to_search, attr: attribute_to_search, term: value_to_search.to_s)
     end
 
-
     if search_results.is_a?(Hash)
       search_results.each do |index, results|
         puts @pastel.on_blue("Results for  #{value_to_search} in #{index}")
-        if results.size > 0
-          print_all_results_as_single_table(index:index_to_search, search_results: results )
-          print_hash_as_table(results)
-        end
+          puts print_all_results_as_single_table(index:index_to_search, search_results: results )
       end
     else
       puts @pastel.on_green("You searched for #{value_to_search} in #{index_to_search}[#{attribute_to_search}]")
-      print_all_results_as_single_table(index:index_to_search, search_results: search_results )
-      print_hash_as_table(search_results)
+      puts print_all_results_as_single_table(index:index_to_search, search_results: search_results )
     end
+    display_details = prompt.select("Do you want to display the detailed search results", ["Yes", "No"])
 
+    if display_details == "Yes"
+      if search_results.is_a?(Hash)
+        search_results.each do |index, results|
+          print_hash_as_table(results, value_to_search)
+        end
+      else
+        print_hash_as_table(search_results, value_to_search)
+      end
+    end
   end
 
   def indices_to_search
@@ -151,5 +160,10 @@ class SearchServiceCli
 
   def attributes_arr(index_to_search)
     data_files_indexer_service.attributes(index_to_search)
+  end
+
+  def array_of_hash?(arr)
+    return true if arr.is_a?(Array) && arr.first&.is_a?(Hash)
+    return false
   end
 end
