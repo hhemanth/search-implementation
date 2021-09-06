@@ -3,7 +3,8 @@
     "tokenize_list": [
       "name",
       "signature",
-      "tags"
+      "tags",
+      "alias"
     ],
     "one_to_one_reference_config": [
       {
