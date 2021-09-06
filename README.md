@@ -2,6 +2,28 @@ This is implementation of Basic Search from scratch. This is a CLI app.
 
 ##Contents
 
+## Summary 
+This is a very simple implementation Search. Search is a vast topic and can get very complicated very fast.
+This implementation works for json files and needs a config file to index and search. config file specifies the schema, to be used. 
+Schema is useful to specify
+- which fields should use text search and which ones exact match 
+- Which fields have a reference one-to-one mapping
+- Which fields have a reference one-to-many mapping
+
+**What I proud of ?**
+- I am proud of the design. Search will work for arbitrary json files. given a config.
+- I am proud of README and comments inside the code, I can pick up and start running even after month or years due to this documentation & tests.
+- We can easily extend the design to include ranking of search results.
+- I am proud of adding 70 test cases and testing various corner cases. 
+- You can search globally for all fields across all indices and it does a fairly good Job. 
+- It scales pretty well , displaying search results, first displays summary results and then if you want displays detailed search results. 
+- The UI also highlights the term you searched for in the search results. 
+
+** What I am not proud of ?**
+- The Search CLI code does not have tests, I really wanted to add tests but I ran out of time. 
+- I wanted to add more corner cases tests fot DataFilesIndexerService, but couldn't bcos of time.
+- I could not test for really large files. I don't know for what file size the app would break. 
+- I could not implement ranking and word stemming, thoough its an easy extension due to the robust design.
 
 
 ### Running the specs
@@ -20,6 +42,8 @@ cd search-implementation
 bundle 
 ruby main.rb
 ```
+
+
 ### Indexing and Searching
 #### Indexing
 - DataFilesIndexerService is the entry point class. It accepts a options parameter which has the following format 
@@ -114,7 +138,9 @@ We have the following validations now
 
 ### About Design & Implementation
 
-![Search Index Storage](readme_images/search_design_architecture.jpeg)
+#### Search & Indexing
+![Search Index Storage](readme_images/search_design_arch.png) 
+
 
 - The class **DataFilesIndexerService** is the entry class and also the integration service for **Search implementation**.
 - As explained in the previous section, indexing and search can be performed using this class APIs.
@@ -126,7 +152,6 @@ We have the following validations now
           the below diagram can do justice to it. **This is the actual search index to do the actual search.**
     - **IndexSearchConfig** -  DataFilesIndexerService maintains one **IndexSearchConfig** object to store the schema. 
       Which is derived from the options passed onto DataFilesIndexerService  
-
       
 Sample data file which has 2 records (taken from organizations.json & most fields stripped). 
 
@@ -161,8 +186,6 @@ The term `tokenize_list` signifies which of the attributes in the data file, wil
 
 
 ### How is data indexed?
-
-
 The indexing of a data file produces the following 2 indices.
 
 - SrcIndex
@@ -196,4 +219,52 @@ The Attribute indices for few attributes look like this
 ```
 
 
-With the help of the above indices, we can search for any terms present in the document and return the results. If the search term is not present, then we return an empty response. 
+With the help of the above indices, we can search for any terms present in the document and return the results. If the search term is not present, then we return an empty response.
+
+#### Other classes
+
+- **AnnotateSearchResults** is used to add one-to-one & one-to-many relation entities to the search results. 
+  For example If the search result contains a User object, which has organization_id field, then **AnnotateSearchResults** adds 
+  a **Organization** field which will contain the **organization** object corresponding to organization_id
+- **IndexSearchConfig** contains the schema to be used while indexing data files. For example the schema for **User** index is as follows. 
+    - **tokenize_list**, tells that the fields *name, signature, tags, alias* are text fields and their contents be broken down into token before indexing
+    - **one_to_one_reference_config** - responsible to handlin one-on-one relations, for example adding an **organization** if **organization_id** 
+      exists in the **User** search sesults
+    - **one_to_many_reference_config** - responsible to handlin one-to-many relations, for example adding field **tickets_submitted** (which will be
+      an array of tickets (Hash)) using the submitter_id (which is a user_id) in Tickets data_file. 
+      Like wise adding field field **tickets_assigned** (which will be an array of tickets (Hash)) using the assignee_id (which is a user_id) 
+      in Tickets data_file.
+- **CompositeTokenizer, ArrayTokenizer, TextTokenizer** are used convert strings, Arrays to tokens. 
+  Will be further useful to add text stemming and other advanced tokenizations.
+- **ErrorMsg** stores error messages used.
+
+```ruby
+{
+  "schema": {
+    "tokenize_list": [
+      "name",
+      "signature",
+      "tags",
+      "alias"
+    ],
+    "one_to_one_reference_config": [
+      {
+        "reference_id":  "organization_id",
+        "reference_entity": "Organization"
+      }
+    ],
+    "one_to_many_reference_config": [
+      {
+        "reference_id":  "submitter_id",
+        "reference_entity": "Ticket",
+        "result_term": "tickets_submitted"
+      },
+      {
+        "reference_id":  "assignee_id",
+        "reference_entity": "Ticket",
+        "result_term": "tickets_assigned"
+      }
+    ]
+  }
+}
+```
