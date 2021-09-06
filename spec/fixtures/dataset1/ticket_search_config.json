@@ -5,13 +5,6 @@
       "description",
       "tags"
     ],
-    "one_to_many_reference_config": [
-      {
-        "reference_id":  "organization_id",
-        "reference_entity": "Ticket",
-        "result_term": "tickets"
-      }
-    ],
     "one_to_one_reference_config": [
       {
         "reference_id":  "organization_id",

@@ -42,7 +42,6 @@ class SearchServiceCli
     @pager = TTY::Pager::BasicPager.new(width: 180)
     @font = TTY::Font.new(:standard)
     puts @font.write("Zendesk Search")
-
   end
 
 

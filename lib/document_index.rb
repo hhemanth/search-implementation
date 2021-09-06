@@ -1,15 +1,16 @@
-require_relative './src_index'
-require_relative './attribute_index'
-require_relative './composite_tokenizer'
-
-require 'pry'
-
 #Indexes and stores the document for easy searching
 # Consider the following document
 # Provied following APIs
 # search & index!
 # contains src_index, which is a index->document hash
 # contains attribute_index_hash which is a attribute->attribute_index_hash
+
+require_relative './src_index'
+require_relative './attribute_index'
+require_relative './composite_tokenizer'
+
+require 'pry'
+
 class DocumentIndex
   attr_accessor :index_name,:options,  :src_index, :attribute_index_hash, :tokenize_list
 
