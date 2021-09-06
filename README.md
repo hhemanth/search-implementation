@@ -1,5 +1,11 @@
 This is implementation of Basic Search from scratch. This is a CLI app. 
 
+## Screenshots
+
+![Search Index Storage](readme_images/initial_screen.png =100x20)
+
+<img src="./readme_images/initial_screen.png" alt="drawing" width="200"/>
+
 
 ## Summary 
 This is a very simple implementation Search. Search is a vast topic and can get very complicated very fast.
