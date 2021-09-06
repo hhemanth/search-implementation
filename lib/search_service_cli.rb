@@ -32,7 +32,8 @@ class SearchServiceCli
     end
     rescue StandardError => e
       puts @pastel.on_red("Something went wrong")
-      puts e.trace
+      puts e.inspect
+      puts e.backtrace.inspect
     end
   end
 
@@ -137,17 +138,17 @@ class SearchServiceCli
 
     print_search_results_summary(attribute_to_search, index_to_search, search_results, value_to_search)
     display_details = prompt.select("Do you want to display the detailed search results", ["Yes", "No"])
-    print_search_result_in_detail(search_results, value_to_search) if display_details == "Yes"
+    print_search_result_in_detail(search_results, value_to_search, index_to_search) if display_details == "Yes"
   end
 
-  def print_search_result_in_detail(search_results, value_to_search)
+  def print_search_result_in_detail(search_results, value_to_search, index_to_search)
     if search_results.is_a?(Hash)
       search_results.each do |index, results|
         puts @pastel.bold.on_green("Results for  #{value_to_search} in #{index}")
         print_hash_as_table(results, value_to_search)
       end
     else
-      puts @pastel.bold.on_blue("Results for  #{value_to_search} in #{index}")
+      puts @pastel.bold.on_blue("Results for  #{value_to_search} in #{index_to_sea}")
       print_hash_as_table(search_results, value_to_search)
     end
   end
